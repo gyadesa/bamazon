@@ -1,6 +1,6 @@
 /* application will first display all of the items available for sale. Include the ids, names, and prices of products for sale.
 */
-var inquirer  = require('inquirer');
+var inquirer = require('inquirer');
 var mysql = require('mysql');
 
 var connection = mysql.createConnection({
@@ -14,15 +14,14 @@ connection.connect();
 
 start()
 
-function start (){
+function start() {
     connection.query('SELECT * FROM products', function (error, res) {
         if (error) throw error;
         // console.log(res);
         res.forEach(row => {
-            console.log(`Id: ${row.item_id} Name: ${row.product_name} Price: ${row.price}\n` )
+            console.log(`Id: ${row.item_id} Name: ${row.product_name} Price: ${row.price}\n`)
         });
         askQuestions()
-
         // connection.end()
     })
 }
@@ -48,32 +47,36 @@ function askQuestions() {
 }
 
 function withdrawProd(prodId, prodQty) {
-  connection.query('SELECT * FROM products', function (error, res) {
-    if (error) throw error;
-    var prod;
-    // console.log(res);
-    for(var i = 0; i < res.length; i++){
-      if(res[i].item_id == prodId){
-        prod = res[i]
-      }
-    }
-    console.log(prod, "prod was found")
-      if(prod.stock_quantity >= prodQty){
-        orderComplete(prod, prodId, prodQty)
-        connection.end()
-      }else{
-        console.log("Sorry! Insufficient quantity!")
-        connection.end()
-      }
-  })
+    connection.query('SELECT * FROM products', function (error, res) {
+        if (error) throw error;
+        var prod;
+        // console.log(res);
+        for (var i = 0; i < res.length; i++) {
+            if (res[i].item_id == prodId) {
+                prod = res[i]
+            }
+        }
+        console.log(prod, "product was found")
+        if (prod.stock_quantity >= prodQty) {
+            orderComplete(prod, prodId, prodQty)
+            connection.end()
+        } else {
+            console.log("Sorry! Insufficient quantity!")
+            connection.end()
+        }
+    })
 };
-function orderComplete (prodObj, prodId, prodQty) {
-  var newQuantity = prodObj.stock_quantity - prodQty;
-  var productSales = prodObj.price * prodQty;
-  var queryOne = "UPDATE products SET stock_quantity = ? where ?";
-  var queryTwo = "UPDATE products SET product_sales = ? where ?";
-  connection.query(queryOne,[newQuantity, {item_id: prodId}], function (error, res) {
-  })
-  connection.query(queryTwo, [productSales, { item_id: prodId }], function (error, res) {
-  })
+function orderComplete(prodObj, prodId, prodQty) {
+    var newQuantity = prodObj.stock_quantity - prodQty;
+    var productSales = prodObj.price * prodQty;
+    var product_nameSale = prodObj.product_name;
+    var queryOne = "UPDATE products SET stock_quantity = ? where ?";
+    var queryTwo = "UPDATE products SET product_sales = ? where ?";
+    connection.query(queryOne, [newQuantity, { item_id: prodId }], function (error, res) {
+        console.log("Your Sale Total Price is: ", productSales);
+        console.log("Invontary of ", product_nameSale , "remaining: ", newQuantity);
+    })
+    /* connection.query(queryTwo, [productSales, { item_id: prodId }], function (error, res) {
+        console.log("Invontary of ", prodObj , "remaining", newQuantity);
+    }) */
 }
